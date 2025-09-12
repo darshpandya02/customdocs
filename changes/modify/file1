@@ -1,69 +1,30 @@
 #file
-content\/en\/docs\/_index.md
+content\/en\/docs\/Experimentation\/emulation.md
 #old
-Merge
+weight: 6
 #new
-SPHERE
+weight: 7
 #file
-content\/en\/docs\/_index.md
+content\/en\/docs\/Experimentation\/resolution.md
 #old
-the SPHERE documentation. Merge
+weight: 7
 #new
-the SPHERE documentation. SPHERE is running Merge software for testbed management and control, and borrows a lot of its documentation from [Merge documentation](https://mergetb.org/docs/). Merge
+weight: 8
 #file
-content\/en\/docs\/Concepts\/_index.md
+content\/en\/docs\/Experimentation\/xdc.md
 #old
-Merge core
+weight: 8
 #new
-core
+weight: 9
 #file
-content\/en\/docs\/Concepts\/overview.md
+content\/en\/docs\/Experimentation\/experiment-automation.md
 #old
-the MergeTB
+weight: 9
 #new
-the SPHERE and Merge testbed
+weight: 10
 #file
-content\/en\/docs\/Concepts\/overview.md
+content\/en\/docs\/Experimentation\/artifacts.md
 #old
-Merge is a testbed
+weight: 10
 #new
-SPHERE is research infrastructure that runs on Merge testbed platform. Merge is testbed
-#file
-content\/en\/docs\/Concepts\/overview.md
-#old
-\*\*The basic(.*\n.*)*Once
-#new
-Once
-#file
-content\/en\/docs\/Concepts\/overview.md
-#old
-does not change.
-#new
-remains the same. You can learn more about Merge concepts [here](https://mergetb.org/docs/concepts).
-
-SPHERE will have three testbed facilities -- at USC/ISI, at USC colocation space and at Northeastern University.
-SPHERE will host heterogeneous resources that are relevant for cybersecurity and privacy experimentation, such as:
-* server-class compute nodes for virtual machine allocation
-* server-class compute nodes with GPUs for machine learning
-* embedded CPUs for large-scale embedded systems experimentation
-* programmable NICs
-* PLCs and CPS simulation software for digital twinning
-* remotely-controlled home IoT devices
-
-Figure below illustrates our vision for SPHERE architecture:
-
-![](/img/arch.jpg)
-
-#file
-content\/en\/docs\/Concepts\/experimentation.md
-#old
-a MergeTB testbed
-#new
-the SPHERE research infrastructure
-#file
-content\/en\/docs\/Concepts\/resources.md
-#old
-a MergeTB facility
-#new
-a SPHERE facility
-
+weight: 11
