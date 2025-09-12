@@ -1,0 +1,141 @@
+#file
+content\/en\/docs\/Experimentation\/_index.md
+#old
+experiments on Merge
+#new
+experiments on SPHERE
+#file
+content\/en\/docs\/Experimentation\/getting-started.md
+#old
+Accounts"
+#new
+Research Accounts "
+#file
+content\/en\/docs\/Experimentation\/getting-started.md
+#old
+Merge
+#new
+SPHERE
+#file
+content\/en\/docs\/Experimentation\/getting-started.md
+#old
+merge accounts to be created
+#new
+SPHERE accounts to be created
+#file
+content\/en\/docs\/Experimentation\/getting-started.md
+#old
+github or google identities
+#new
+an institutional login (e.g., with your University) or a Google login
+#file
+content\/en\/docs\/Experimentation\/getting-started.md
+#old
+on a SPHERE
+#new
+on the SPHERE
+#file
+content\/en\/docs\/Experimentation\/getting-started.md
+#old
+SPHERE command line
+#new
+Merge command line
+#file
+content\/en\/docs\/Experimentation\/getting-started.md
+#old
+Send a notification to the SPHERE portal administrators to have your account created and activated. If you joined an organization while registering for a new account, contact that organization's administrators.
+#new
+For regular accounts, SPHERE administrators will receive automated alerts and will manually approve your account. Accounts for class and artifact evaluation use are programmatically created an approved. If you joined an organization while registering for a new account, contact that organization’s administrators.
+#file
+content\/en\/docs\/Experimentation\/getting-started.md
+#old
+SPHERE CLI
+#new
+Merge CLI
+#file
+content\/en\/docs\/Experimentation\/getting-started.md
+#old
+SPHERETB
+#new
+MergeTB
+#file
+content\/en\/docs\/Experimentation\/getting-started.md
+#old
+Once you have created an account using either the web interface or the CLI, you should send a
+notification to the SPHERE portal or your organization administrators to have your account approved
+#new
+Once you have created an account using either the web interface or the CLI, administrators will approve your account or ask you for more information. If you joined an organization, please contact the organization owner directly to approve your account.
+#file
+content\/en\/docs\/Experimentation\/classes\/index.md
+#old
+Merge
+#new
+SPHERE
+#file
+content\/en\/docs\/Experimentation\/classes\/index.md
+#old
+Deterlab
+#new
+SPHERE
+#file
+content\/en\/docs\/Experimentation\/hello-world.md
+#old
+Merge
+#new
+SPHERE
+#file
+content\/en\/docs\/Experimentation\/hello-world.md
+#old
+DeterLab
+#new
+SPHERE
+#file
+content\/en\/docs\/Experimentation\/hello-world.md
+#old
+Realizing an Experiment\n
+#new
+Realizing an Experiment (Reserving Resources)
+#file
+content\/en\/docs\/Experimentation\/experiment-automation.md
+#old
+Merge
+#new
+SPHERE
+#file
+content\/en\/docs\/Experimentation\/experiment-automation.md
+#old
+the recommended tool for experiment automation
+#new
+a well-suited tool for automation of experiment setup
+#file
+content\/en\/docs\/Experimentation\/xdc.md
+#old
+MergeTB
+#new
+SPHERE
+#file
+content\/en\/docs\/Experimentation\/xdc.md
+#old
+Merge
+#new
+SPHERE
+#file
+content\/en\/docs\/Experimentation\/hello-world-gui\/index.md 
+#old
+MergeTB
+#new
+SPHERE
+#file
+content\/en\/docs\/Experimentation\/hello-world-gui\/index.md 
+#old
+Merge
+#new
+SPHERE
+#file
+content\/en\/docs\/Experimentation\/resolution.md 
+#old
+in Merge testbeds
+#new
+on SPHERE, powered by Merge software
+
+
