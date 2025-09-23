@@ -123,7 +123,7 @@ Answer the questions specified in your lab materials and submit answers using ou
 
 Your assignment may ask you to include some files from your experimental nodes. Please follow instructions <a href="../xdc/">here</a> (scroll all the way to the bottom). The instructions assume you have installed `mrg` utility on your home machine. To do so, please obtain the source (and follow README to compile it) or binary <a href="https://gitlab.com/mergetb/portal/cli/-/releases">from this site</a>. After installation <a href="../getting-started/#configuring-the-api-endpoint">configured your API point</a> (you only have to do this once) and have logged into your merge account by doing `mrg login yourusername -p yourpassword` (you have to do this each time you open a new terminal on your machine).
 
-A complete example is in <a href="https://www.isi.deterlab.net/file.php?file=/share/education/twonode/html/index.html#tasks">this assignment</a>.
+A complete example is in <a href="https://jelenamirkovic.github.io/sphere-education.github.io/docs/twonode/index.html#tasks">this assignment</a>.
 
 ### Port Forwarding
 

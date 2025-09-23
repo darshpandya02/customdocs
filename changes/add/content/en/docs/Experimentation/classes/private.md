@@ -54,7 +54,7 @@ If you previously used start-cmd to set up your nodes, then in each install file
 
   * For each command that uses a file from a user's home directory, a project directory or /share directory, you will need to copy that file into the given subfolder in /organization, and modify the command to look for it in the node's local `/tmp` folder under the folder with the node's name.
 
-  * For example if node `a` previously ran a start-cmd directive that was doing `somecmd /share/somefile` you would copy `somefile` from old DeterLab into `/organizations/labname/a/somefile` on your XDC. See [our scp instructions](https://mergetb.org/docs/experimentation/xdc/#copying-files-to-or-from-your-xdc) for how to copy files. You can also see some step-by-step examples [in this lab exercise](https://www.isi.deterlab.net/file.php?file=/share/education/twonode/html).
+  * For example if node `a` previously ran a start-cmd directive that was doing `somecmd /share/somefile` you would copy `somefile` from old DeterLab into `/organizations/labname/a/somefile` on your XDC. See [our scp instructions](https://mergetb.org/docs/experimentation/xdc/#copying-files-to-or-from-your-xdc) for how to copy files. You can also see some step-by-step examples [in this lab exercise](https://jelenamirkovic.github.io/sphere-education.github.io/docs/twonode/index.html).
 
   * Once you copy the file, you would also change the command from `somecmd /share/somefile` to `somecmd /tmp/a/somefile`. In the illustration this is done to copy contents of `folder1` into `/var/www/html` on node `Y`.
 
