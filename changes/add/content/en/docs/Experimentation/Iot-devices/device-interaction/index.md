@@ -15,7 +15,7 @@ any issues as you encounter them. Additionally, any feedback is greatly apprecia
 and materializing devices.
 {{% /alert %}}
 
-# Experiment Manager Interaction
+#### Experiment Manager Interaction
 
 The IoT devices are being controlled by an experiment manager which handles IoT device commands from the user through
 the spiot-client. If not already started, the spiot-client can be started in the XDC with the following:
@@ -63,7 +63,7 @@ be given time to start up or for execution to be completed on an operation.
 The experiment read command will read the specified file from the XDC and will send all the commands contained in
 the file to be run automatically from a job queue.
 
-# Device Interaction
+#### Device Interaction
 
 To get a list of commands supported by a device you can run the one of the two following commands:
 ```
@@ -97,7 +97,7 @@ The results of running both of these commands would return:
 
 ![](04_Dev_Name_Command_Help.png#zoomable)
 
-# Command Queries
+#### Command Queries
 
 Some commands are asynchronously queued, these commands are given a job id that can be
 store and used by experiment to get information about the command being executed.
