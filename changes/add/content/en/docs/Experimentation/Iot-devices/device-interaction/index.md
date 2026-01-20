@@ -11,7 +11,7 @@ description: >
 any issues as you encounter them. Additionally, any feedback is greatly appreciated. - NEU IoT Facility {{% /alert %}}
 
 {{% alert title="Note" color="info" %}} This guide uses the assumes the IoT Devices have been created. See 
-[Device Creation](docs/Experimentation/Special_Resources/IoT_Devices/device_creation) for information on reserving
+[Device Creation](docs/Experimentation/Iot-devices/device-creation) for information on reserving
 and materializing devices.
 {{% /alert %}}
 
