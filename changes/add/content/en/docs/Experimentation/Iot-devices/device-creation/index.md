@@ -82,6 +82,14 @@ Prompts for every option, including experiment name, description, network name, 
 mrg-iot run
 ```
 
+At startup you are asked whether to use the simplified setup:
+
+![](02_Mrgiot_Auto_Mode_Select.png#zoomable)
+
+Each value is confirmed before the model is compiled and pushed:
+
+![](07_Mrgiot_Manual_Experiment_Setup.png#zoomable)
+
 #### Simplified Interactive Mode
 
 Uses sensible defaults for optional fields and only prompts for inputs that cannot be inferred. Default values are derived from your username:
@@ -170,9 +178,15 @@ All devices available in your project are listed with index numbers. Select devi
 
 ![](05_Mrgiot_Auto_Select_Devices.png#zoomable)
 
+Invalid or unknown device names are ignored, and your selection is confirmed before continuing:
+
+![](06_Mrgiot_Auto_Select_Devices_Out.png#zoomable)
+
 **4. Model Compilation and Push**
 
 `mrg-iot` builds a Python experiment model, compiles it, and pushes it to the Merge portal. In simplified mode this happens automatically; in customized mode you are first prompted for the experiment name, description, and network name.
+
+![](07_Mrgiot_Auto_Compile.png#zoomable)
 
 **5. Duration Selection**
 
@@ -187,6 +201,8 @@ The experiment is realized (resources are reserved) and then materialized (devic
 **7. XDC Creation and Attachment**
 
 An XDC is created and the realization is attached to it. `mrg-iot` waits until the XDC is ready before proceeding.
+
+![](09_Mrgiot_Manual_xdc_Name.png#zoomable)
 
 ![](10_Mrgiot_Experiment_Start_Up.png#zoomable)
 
@@ -217,7 +233,11 @@ Type `exit` at the `spiot_ctl` prompt to end the session. `mrg-iot` then:
    realiot.jsmith.neuiot.tar.gz
    ```
 
+   ![](12_Mrgiot_Experiment_Download.png#zoomable)
+
 2. **Cleans up resources.** In simplified mode the XDC is deleted automatically after the realization is detached and relinquished. In customized mode you are prompted whether to delete the XDC and then the experiment.
+
+   ![](13_Mrgiot_Manual_Post_Download.png#zoomable)
 
 To extract the downloaded archive:
 

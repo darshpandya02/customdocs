@@ -115,8 +115,6 @@ Example:
 s-echodot-1 help
 ```
 
-![](03_Dev_Name_Help.png#zoomable)
-
 The output lists each command name alongside a brief description of what it does.
 
 {{% alert title="Note" color="info" %}}
@@ -199,8 +197,6 @@ query state s-echodot-1 click_button 0
 query get_result s-echodot-1 click_button 0
 ```
 
-![](05_Query_State_and_Get_Result.png#zoomable)
-
 ### Wait for Result
 
 Block until the command completes, then return the result immediately. This eliminates the need to manually poll state:
@@ -240,8 +236,6 @@ Execute `click_button` on `s-echodot-1` and store the returned job ID in a varia
 ```
 s-echodot-1 -s job id click_button
 ```
-
-![](07_Store_Load_Job_Id.png#zoomable)
 
 ### Example: Using a Stored Variable
 
