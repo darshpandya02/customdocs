@@ -7,7 +7,7 @@ description: >
 ---
 
 {{% alert title="Prerequisite" color="info" %}}
-This guide assumes IoT devices have already been reserved and an active session is running. See [Device Creation](../device-creation) for setup instructions, or the [Quickstart](../quickstart) for the short path.
+This guide assumes IoT devices have already been reserved and an active session is running. See [Device Creation](../device-creation/) for setup instructions, or the [Quickstart](../quickstart/) for the short path.
 {{% /alert %}}
 
 ## Overview

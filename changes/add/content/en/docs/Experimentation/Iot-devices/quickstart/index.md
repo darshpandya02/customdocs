@@ -8,8 +8,8 @@ description: >
 
 This guide walks the **happy path**: install the tool, start an experiment with default
 settings, and send a command to a device. For the full set of options, modes, and the
-manual workflow, see [Device Creation](../device-creation); for the complete control
-command reference, see [Device Interaction](../device-interaction).
+manual workflow, see [Device Creation](../device-creation/); for the complete control
+command reference, see [Device Interaction](../device-interaction/).
 
 {{% alert title="Beta" color="warning" %}}
 IoT device support is currently in **beta**. Report issues and share feedback with the NEU IoT Facility.
@@ -91,7 +91,7 @@ exit
 
 ## Next steps
 
-- **[Device Creation](../device-creation)** — interactive, non-interactive, and daemon
+- **[Device Creation](../device-creation/)** — interactive, non-interactive, and daemon
   modes; the manual `mergexp` path; and per-resource management commands.
-- **[Device Interaction](../device-interaction)** — the full `exp` / `dev` / `query`
+- **[Device Interaction](../device-interaction/)** — the full `exp` / `dev` / `query`
   command reference, async job handling, and automation with stored variables.
