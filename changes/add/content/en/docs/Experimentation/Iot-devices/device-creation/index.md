@@ -1,226 +1,425 @@
 ---
 title: "Device Creation"
 linkTitle: "Device Creation"
-weight: 1
+weight: 2
 description: >
-    Incorporate IoT Devices provided by Northeastern as a part of experiments, using an automated client or the Merge portal
+    Reserve, materialize, and connect to Sphere IoT devices using the mrg-iot CLI or the Merge portal directly.
 ---
 
+New to IoT devices on Sphere? Start with the [Quickstart](../quickstart) for the
+shortest path. This page is the complete reference for every creation workflow.
 
-{{% alert title="Attention" color="warning" %}} Support for IoT Devices is currently in beta, please report
-any issues as you encounter them. Additionally, any feedback is greatly appreciated. - NEU IoT Facility {{% /alert %}}
+## Overview
 
-## Automated Experiment Creation
+IoT devices in Sphere are provisioned as nodes within a **realization** attached to an **XDC** (Experiment Development Container). Once a realization is active and the XDC is connected, SSH tunnels expose three services to your laptop:
 
-{{% alert title="Attention" color="warning" %}} This guide works only for experiments where
-only IoT Devices are being materialized.
-{{% /alert %}}
+| Port | Service |
+|------|---------|
+| `8554` | RTSP video stream proxy (camera-equipped devices) |
+| `9000` | Experiment file download server |
+| `17000` | ExperimentControl gRPC channel |
 
-{{% alert title="Note" color="info" %}} This guide uses the "mrg-iot" tool to manage device model creation, materialization, reservation, and activation. Additionally, the tool automatically will open camera feeds for devices that support them.
-{{% /alert %}}
+There are two ways to reach this state: the **automated path** using `mrg-iot` (recommended), and the **manual path** via the Merge portal or CLI with hand-crafted experiment models.
 
-The `mrg-iot` tool can be downloaded using the [mrgiot-download script](https://gitlab.com/-/snippets/4900374/raw/main/mrgiot-download?inline=false), the script will download the latest version of `mrg-iot`. The script can be ran using the following commands:
+---
+
+## Prerequisites
+
+- A Sphere / Merge Testbed account with access to an IoT project (e.g. `neuiot`)
+- Python 3.10 or later
+- `pipx` installed (`pip install --user pipx` then `pipx ensurepath`)
+- [VLC](https://www.videolan.org) for viewing RTSP camera streams (the tool launches VLC automatically)
+
+---
+
+## Automated Experiment Creation with mrg-iot
+
+### Installation
+
+Install `mrg-iot` from PyPI into an isolated environment:
 
 ```sh
-chmod +x ./mrgiot-download
-./mrgiot-download
+pipx install mrg-iot
 ```
 
-The script will result in the following:
-
-![](01_Mrgiot_Download.png#zoomable)
-
-This creates the `mrgiot/` directory which contains all the files for running the tool and verifying you have all of the requirements. Once run the tool checks for if an update is available, and downloads it if possible. If the tool is up to date then, it checks if there is a virtual environment is present, and creates one and installs all of its requirements if it is not. The tool can be ran using the following command:
+Verify the installation:
 
 ```sh
-./mrg-iot
+mrg-iot --version
 ```
 
-The tool will provide the following prompt:
-
-![](02_Mrgiot_Auto_Mode_Select.png#zoomable)
-
-Simplfied experiment set up will provide default values for the experiment rather than prompting for them, except for the duration of experiment realization. As an example for the user `jsmith` the default values would be:
+{{% alert title="macOS SSL workaround" color="info" %}}
+If portal calls fail with an SSL error, run:
+```sh
+export SSL_CERT_FILE="$(python -m certifi)"
+export REQUESTS_CA_BUNDLE="$SSL_CERT_FILE"
 ```
-experiment name: <username> -> jsmith
-experiment description: Experiment generated using mrg-iot tool by <username> -> Experiment generated using mrg-iot tool by jsmith
-network name: mrg-iot-net
-realization name: realiot
-xdc name: <username>xdc -> jsmithxdc
+{{% /alert %}}
+
+### Authentication
+
+Save your Sphere credentials locally before running experiments:
+
+```sh
+mrg-iot login
 ```
 
-You will then be prompted for your username and password in order to authenticate you and get resources you have access to:
+This stores a session token at `~/.mrg-iot/session.json` (mode `0600`). To remove stored credentials:
+
+```sh
+mrg-iot logout
+```
+
+### Running an Experiment
+
+`mrg-iot run` drives the complete experiment lifecycle — from device selection through cleanup — in a single command. It supports three modes:
+
+#### Interactive Mode (default)
+
+Prompts for every option, including experiment name, description, network name, realization name, XDC name, and duration:
+
+```sh
+mrg-iot run
+```
+
+#### Simplified Interactive Mode
+
+Uses sensible defaults for optional fields and only prompts for inputs that cannot be inferred. Default values are derived from your username:
+
+| Field | Default value |
+|---|---|
+| Experiment name | `<username>` |
+| Experiment description | `Experiment generated using mrg-iot tool by <username>` |
+| Network name | `mrg-iot-net` |
+| Realization name | `realiot` |
+| XDC name | `<username>xdc` |
+
+```sh
+mrg-iot run --simplified
+```
+
+#### Non-Interactive (Scripted) Mode
+
+Supplies all values via flags; no prompts are shown. Suitable for CI pipelines and reproducible workflows:
+
+```sh
+mrg-iot run --non-interactive \
+  --project neuiot \
+  --devices s-echodot-1 s-googlenest-1 \
+  --exp-name myexp \
+  --exp-desc "Smart-speaker capture run" \
+  --realization realiot \
+  --duration 4d \
+  --xdc myxdc \
+  --commands-file /path/to/commands.txt
+```
+
+**Available flags for `mrg-iot run`:**
+
+| Flag | Short | Description |
+|---|---|---|
+| `--non-interactive` | `-n` | Disable all prompts; requires all flags to be set |
+| `--simplified` | `-s` | Interactive mode with default values pre-filled |
+| `--project <name>` | | Target project (e.g. `neuiot`) |
+| `--devices <d> [<d>...]` | | One or more device names |
+| `--exp-name <name>` | | Experiment name |
+| `--exp-desc <text>` | | Experiment description |
+| `--realization <name>` | | Realization name |
+| `--duration <duration>` | | Experiment duration (minimum: 4 days) |
+| `--xdc <name>` | | XDC name |
+| `--network <name>` | `-net` | Model network name (default: `mrg-iot-net`) |
+| `--commands-file <path>` | `-cf` | Path to a newline-delimited file of commands to run automatically |
+| `--download-files` | `-df` | Automatically download the experiment archive on exit |
+| `--delete-xdc` | `-dx` | Delete the XDC during cleanup |
+| `--delete-exp` | `-de` | Delete the experiment during cleanup |
+| `--debug` | `-d` | Write verbose logs to stderr and `debug.log` |
+
+### Input Validation Rules
+
+The CLI validates inputs before contacting the portal and exits with code `2` on failure:
+
+| Field | Rules |
+|---|---|
+| Names (experiment, realization, XDC, network) | Lowercase letters and digits only; must start with a letter; max 32 characters |
+| Description | Letters, digits, spaces, commas, periods, hyphens; max 256 characters |
+| Duration | Minimum **4 days**. Formats: `1w`, `4d`, `1w2d3h`, `1 week 2 days` |
+
+{{% alert title="Recommendation" color="info" %}}
+Use at least `4d` (4 days) as the duration. Expiry notifications are sent 3 days before XDC expiry and 1 day before realization expiry, so shorter durations leave no buffer.
+{{% /alert %}}
+
+### Step-by-Step Walkthrough
+
+The following describes what happens when you run `mrg-iot run`:
+
+**1. Login**
+
+If no valid session token exists, you are prompted for your Sphere username and password.
 
 ![](03_Mrgiot_Auto_Login.png#zoomable)
 
-After logging in, if you are in more than one project, you will be prompted to select what project to create the experiment under. When prompted to select a project from multiple projects you will receive the following prompt:
+**2. Project Selection**
+
+If your account belongs to more than one project, you are presented with a numbered list. Enter the index or name of the project to use.
 
 ![](04_Mrgiot_Auto_Projects.png#zoomable)
 
-From your selected project all of the available devices will be presented all with an index number. Such as follows:
+**3. Device Selection**
+
+All devices available in your project are listed with index numbers. Select devices by index or by name. You may add multiple devices across several prompts. Once finished, enter an empty line or confirm to proceed.
 
 ![](05_Mrgiot_Auto_Select_Devices.png#zoomable)
 
-You can select devices using both the index and the name listed as an example:
+**4. Model Compilation and Push**
 
-![](06_Mrgiot_Auto_Select_Devices_Out.png#zoomable)
+`mrg-iot` builds a Python experiment model, compiles it, and pushes it to the Merge portal. In simplified mode this happens automatically; in customized mode you are first prompted for the experiment name, description, and network name.
 
-Once you add devices you will be asked if you would like to add more devices to the experiment. After selecting devices, the model will be compiled and pushed to the experiment. If you are not using simplified set up, you will be prompted for an experiment name, experiment description, and network name to be used for the model. 
+**5. Duration Selection**
 
-<details open> 
-<summary>Simplified Setup</summary>
-
-![](07_Mrgiot_Auto_Compile.png#zoomable)
-
-</details>
-
-<details> 
-<summary>Customized Setup</summary>
-
-![](07_Mrgiot_Manual_Experiment_Setup.png#zoomable)
-
-</details>
-
-Then you will be prompted for a duration for the realization and the
-XDC in an `xw xd xh xm xs` format for specifying the number of weeks, days, hours, minutes, and seconds. As a recommendation, `0w 4d 0h 0m 0s`
-is the minimum recommended duration as you begin receive notifications for XDC expiry 3 days before it expires and notifications for realization 
-expiration 1 day before it expires.
+Enter how long the realization and XDC should remain active, in `<N>w <N>d <N>h <N>m <N>s` format. Example: `0w 4d 0h 0m 0s`.
 
 ![](08_Mrgiot_Auto_Select_Duration.png#zoomable)
 
+**6. Realization and Materialization**
 
-Once the duration is selected, the experiment is realized then materialized, followed by the creation of the XDC, which the realization attaches to.
-If simplified experiment setup is not selected you will be prompted for name for the name of the XDC, otherwise the default value is used.
+The experiment is realized (resources are reserved) and then materialized (devices are booted and configured).
 
-<details> 
-<summary>Customized Setup</summary>
+**7. XDC Creation and Attachment**
 
-![](09_Mrgiot_Manual_xdc_Name.png#zoomable)
-
-</details>
-
-Once XDC is created, `mrgiot` will wait until the XDC is ready before attaching the realization. Then the experiment will be set up by connecting  and creating ssh tunnels and running setup scripts, which downloads utility scripts and the main client for invoking commands.
+An XDC is created and the realization is attached to it. `mrg-iot` waits until the XDC is ready before proceeding.
 
 ![](10_Mrgiot_Experiment_Start_Up.png#zoomable)
 
-If any of the devices have cameras that can be accessed for monitoring, an `ffplay` window will be opened for each camera you have access to. As an example in an experiment using `s-echodot-2` the following camera feed will be opened.
+**8. Tunnel Setup**
+
+SSH tunnels are established from your laptop to the XDC, forwarding ports `8554`, `9000`, and `17000`.
+
+**9. Camera Streams**
+
+If any selected device has an accessible camera, a VLC window opens automatically for each camera feed. (If VLC is not installed, the streams are skipped but remain available at `rtsp://localhost:8554/<handler>`.)
 
 ![](11_Mrgiot_Camera_Stream.png#zoomable)
 
-Once the you are done with the experiment, you can type `exit` from within the running spiot-ctl tool in order to end the tool and notify mrg-iot. Which
-then prompts you if you would like to download your files from your experiment, the experiment files will be within a tar.gz file that needs to be extracted.
+**10. Interactive Session**
 
-![](12_Mrgiot_Experiment_Download.png#zoomable)
+The `spiot_ctl` prompt becomes available. See [Device Interaction](../device-interaction) for the full command reference.
 
-Once the download is complete or is skipped, if simplified experiment setup is selected, then the XDC will be deleted after the realization is detached and relinquished. Otherwise you will be propmted if you would like to delete your XDC. For both forms of set up you will then be propmte for whether you would like to delete the experiment.
+### Post-Experiment Cleanup
 
-<details open> 
-<summary>Simplified Setup</summary>
+Type `exit` at the `spiot_ctl` prompt to end the session. `mrg-iot` then:
 
-![](13_Mrgiot_Auto_Post_Download.png#zoomable)
+1. **Offers to download experiment files.** Files are packaged as a `.tar.gz` archive named:
+   ```
+   <realization>.<experiment>.<project>.tar.gz
+   ```
+   With simplified setup and username `jsmith` on project `neuiot`:
+   ```
+   realiot.jsmith.neuiot.tar.gz
+   ```
 
-</details>
+2. **Cleans up resources.** In simplified mode the XDC is deleted automatically after the realization is detached and relinquished. In customized mode you are prompted whether to delete the XDC and then the experiment.
 
-<details> 
-<summary>Customized Setup</summary>
-
-![](13_Mrgiot_Manual_Post_Download.png#zoomable)
-
-</details>
-
-Once `mrgiot` is closed the archive for the experiment can be extracted and viewd. The file is named based on your enclave id, which is as follows:
-```
-<realization name>.<experiment name>.<project name>.tar.gz
-```
-
-When using simplified set up this defaults to
-```
-realiot.<username>.<project>.tar.gz
-```
-
-As an example user `jsmith` running an experiment on `neuiot` would get the file `realiot.jsmith.neuiot.tar.gz`. To extract the files an `tar -xvf` command can be called, which in the jsmith example would be:
+To extract the downloaded archive:
 
 ```sh
 tar -xvf realiot.jsmith.neuiot.tar.gz
 ```
 
-Doing this results in the following:
+![](14_Mrgiot_Extract_Download.png#zoomable)
 
-![](14_Mrgiot_Extract_Download.png)
+The archive contains at minimum a log file and a `.pcap` network capture. Additional files (screenshots, command outputs) are included based on the commands you ran during the session.
 
-At minimum a log file and pcap file are produced, however based on the commands run more files my be included in the tar.
+---
+
+## Persistent Daemon Mode
+
+For workflows where you need to drive an experiment from multiple terminal sessions or scripts without keeping `mrg-iot run` open, use the daemon-backed connection mode.
+
+### Starting the Daemon
+
+```sh
+mrg-iot connect
+```
+
+This resolves the enclave interactively (or via flags), spawns a background daemon, and returns immediately. The daemon writes a connection descriptor to `~/.mrg-iot/connection.json` and a Unix socket to `~/.mrg-iot/connection.sock`.
+
+Optional flags to skip prompts:
+
+```sh
+mrg-iot connect \
+  --project neuiot \
+  --experiment myexp \
+  --realization realiot \
+  --xdc myxdc
+```
+
+### Sending Commands
+
+```sh
+mrg-iot send "exp devices"
+mrg-iot send "s-echodot-1 click_button"
+mrg-iot send "exp cred s-echodot-1" "exp sleep 10"   # multiple commands, executed in order
+```
+
+### Viewing Camera Streams
+
+```sh
+mrg-iot show video
+```
+
+Opens a viewer window for each accessible camera in the active experiment.
+
+### Downloading Experiment Files
+
+```sh
+mrg-iot download traffic
+mrg-iot download traffic --output /path/to/output.tar.gz
+```
+
+### Stopping the Daemon
+
+```sh
+mrg-iot disconnect
+```
+
+---
 
 ## Manual Experiment Creation
 
-{{% alert title="Attention" color="warning" %}}
-Experiment creation follows the same systems used for the reservation of other nodes, for documentation
-on this system see the "Hello World" 
-([Command Line Interface](/docs/experimentation/hello-world),
-[Web Interface](/docs/experimentation/hello-world-gui)) documentation for more information.
-{{% /alert %}}
-
 {{% alert title="Note" color="info" %}}
-It is recommended to us FFplay for watching rtsp streams from devices, as users have previously experienced
-issues watching streams using VLC
+For experiments that include non-IoT nodes, the manual path is required. For IoT-only experiments the automated path with `mrg-iot` is strongly recommended.
+
+Consult the Merge Testbed Hello World documentation ([CLI](/docs/experimentation/hello-world) / [Web Interface](/docs/experimentation/hello-world-gui)) for foundational experiment creation concepts.
 {{% /alert %}}
 
-When creating the experiment, in order incorporate IoT devices into the host parameter of a node, and specifying
-it is a metal node. As an example, a user wanting to create an experiment with nodes `a`, `b`, and `c` where the 
-devices are `s-echodot-1`, `s-echodot-2`, and `s-echopop-1` respectively. In this example where `a` is connected
-to `b` which is connected to `c`, which is not connected to `a`. The user would create the following model:
+### 1. Write the Experiment Model
+
+IoT devices are reserved as **metal nodes**. Specify the device name in the `host` parameter. The following example creates three nodes connected in a chain:
 
 ```python
 from mergexp import *
 
-# Create a network topology object
 net = Network("Example", addressing==ipv4, routing==static)
 
 a = net.node("a", metal==True, host=="s-echodot-1")
 b = net.node("b", metal==True, host=="s-echodot-2")
 c = net.node("c", metal==True, host=="s-echopop-1")
 
-net.connect([a,b])
-net.connect([b,c])
+net.connect([a, b])
+net.connect([b, c])
 
 experiment(net)
 ```
 
-Once the experiment is realized and attached to an XDC, connect to it using the following mrg command:
+Compile and push the model, then realize and materialize through the Merge portal or CLI.
+
+### 2. Connect to the XDC with Port Forwarding
+
+Connect to the XDC while establishing the required tunnels:
+
 ```sh
-mrg xdc ssh <xdc_name>
+mrg xdc ssh <xdc_name> -L 9000:192.168.254.1:9000 -L 8554:192.168.254.1:8554
 ```
 
-Before starting the experiment, you need to determine the IP address the socket, to do this update apt-get, then download nmap and run a scan, to do this run the following commands
+This forwards the file download server (port `9000`) on the host machine (IP `192.168.254.1`) to your local machine. For the RTSP video stream, add `-L 8554:192.168.254.1:8554`.
+
+### 3. Download and Run the Control Client
+
+Inside the XDC, download the `mrg-iot` tool:
+
 ```sh
-sudo apt-get update
-sudo apt-get install nmap
-nmap -sn 172.30.0-254.1 | grep -oE '172\.30\.[0-9]+\.1'
+pip install mrg-iot
 ```
 
-This will return the IP address being used by the socket, once this is done, exit the ssh then reconnect and create tunnels for communication with the following command:
+Start the client:
+
 ```sh
-mrg xdc ssh <xdc_name> -L 9000:<IP Address>:9000 
+mrg-iot ctl
 ```
 
-This will connect to the XDC while linking to the RTSP restream and file server. Which can be used for
-interacting with the experiment while in progress. The following command will download the spiot-client
-which is used for direct experiment communication.
+### 4. Access Camera Streams
+
+While connected with the tunnel active, open a stream on your local device with VLC:
+
 ```sh
-curl https://gitlab.com/-/snippets/4897951/raw/main/spiot_ctl | tr -d '\r' > spiot_ctl; chmod +x ./spiot_ctl
+vlc rtsp://localhost:8554/<handler_name>
 ```
 
-Which can then be run:
-```sh
-./spiot_ctl <IP Address>
-```
+{{% alert title="Note" color="info" %}}
+Install VLC from your OS package manager (it is not a pip package) and ensure it is on your `PATH`. The stream URL works in any RTSP-capable player if you prefer a different viewer.
+{{% /alert %}}
 
-For accessing the remote stream you can use the data provided by the command line interface:
-```sh
-ffplay rtsp://localhost:8554/<handler_name>
-```
+### 5. Download Experiment Files
 
-To download experiment files, while linked to the XDC run:
+While the XDC tunnel is active, download files on your local device:
+
 ```sh
 curl -O -J http://localhost:9000
 ```
 
+---
+
+## Resource Management Reference
+
+`mrg-iot` exposes fine-grained subcommands for managing individual resources outside of the full experiment workflow.
+
+### Experiments
+
+```sh
+mrg-iot exp list [--project <project>]
+mrg-iot exp info --project <project> --name <name>
+mrg-iot exp create --project <project> --name <name> [--description <desc>] \
+    [--network <net>] [--realization <rz>] [--duration <d>]
+mrg-iot exp delete --project <project> --name <name>
+```
+
+### Realizations
+
+```sh
+mrg-iot realization list   --project <project> --experiment <exp>
+mrg-iot realization info   --project <project> --experiment <exp> --name <rz>
+mrg-iot realization status --project <project> --experiment <exp> --name <rz>
+mrg-iot realization create --project <project> --experiment <exp> \
+    --devices <d1> [<d2>...] [--name <rz>] [--network <net>] [--duration <d>]
+mrg-iot realization relinquish --project <project> --experiment <exp> --name <rz>
+```
+
+`realization` may be abbreviated as `rz`.
+
+### Materializations
+
+```sh
+mrg-iot materialization list          --project <project> --experiment <exp>
+mrg-iot materialization info          --project <project> --experiment <exp> --realization <rz>
+mrg-iot materialization status        --project <project> --experiment <exp> --realization <rz>
+mrg-iot materialization create        --project <project> --experiment <exp> --realization <rz>
+mrg-iot materialization dematerialize --project <project> --experiment <exp> --realization <rz>
+```
+
+`materialization` may be abbreviated as `mtz`.
+
+### XDCs
+
+```sh
+mrg-iot xdc list [--project <project>]
+mrg-iot xdc info   --project <project> --name <name>
+mrg-iot xdc create --project <project> [--name <name>] [--duration <d>] [--no-wait]
+mrg-iot xdc create --project <project> --experiment <exp> --realization <rz>
+mrg-iot xdc attach --project <project> --name <name> --experiment <exp> --realization <rz>
+mrg-iot xdc detach --project <project> --name <name> --experiment <exp> --realization <rz>
+mrg-iot xdc delete --project <project> --name <name>
+```
+
+---
+
+## In-XDC Interactive Client
+
+`mrg-iot ctl` is an interactive client intended to be run **from inside the XDC**, connecting directly to ExperimentControl over WireGuard rather than through an SSH tunnel. No portal login is required.
+
+```sh
+mrg-iot ctl              # connects to 192.168.254.1:17000 (default)
+```
+
+This opens the same `spiot_ctl` prompt used by `mrg-iot run`. See [Device Interaction](../device-interaction) for the full command reference.
+
+Command history is saved to `~/.spiot_history` (up to 500 entries).
