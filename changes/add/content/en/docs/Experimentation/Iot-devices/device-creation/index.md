@@ -309,7 +309,7 @@ mrg-iot disconnect
 {{% alert title="Note" color="info" %}}
 For experiments that include non-IoT nodes, the manual path is required. For IoT-only experiments the automated path with `mrg-iot` is strongly recommended.
 
-Consult the Merge Testbed Hello World documentation ([CLI](/docs/experimentation/hello-world) / [Web Interface](/docs/experimentation/hello-world-gui)) for foundational experiment creation concepts.
+Consult the Merge Testbed Hello World documentation ([CLI](/docs/experimentation/hello-world/) / [Web Interface](/docs/experimentation/hello-world-gui/)) for foundational experiment creation concepts.
 {{% /alert %}}
 
 ### 1. Write the Experiment Model
