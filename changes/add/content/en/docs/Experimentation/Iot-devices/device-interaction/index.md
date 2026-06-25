@@ -1,169 +1,376 @@
 ---
 title: "Device Interaction"
 linkTitle: "Device Interaction"
-weight: 2
+weight: 3
 description: >
-    Learn how to incorporate and use IoT Devices provided by Northeastern as a part of experiments
+    Issue commands to IoT devices, query async job results, and automate experiment workflows using the spiot_ctl control interface.
 ---
 
-
-{{% alert title="Attention" color="warning" %}} Support for IoT Devices is currently in beta, please report
-any issues as you encounter them. Additionally, any feedback is greatly appreciated. - NEU IoT Facility {{% /alert %}}
-
-{{% alert title="Note" color="info" %}} This guide uses the assumes the IoT Devices have been created. See 
-[Device Creation](docs/Experimentation/Iot-devices/device-creation) for information on reserving
-and materializing devices.
+{{% alert title="Prerequisite" color="info" %}}
+This guide assumes IoT devices have already been reserved and an active session is running. See [Device Creation](../device-creation) for setup instructions, or the [Quickstart](../quickstart) for the short path.
 {{% /alert %}}
 
-## Experiment Manager Interaction
+## Overview
 
-The IoT devices are being controlled by an experiment manager which handles IoT device commands from the user through
-the spiot-client. If not already started, the spiot-client can be started in the XDC with the following:
+All device interaction goes through the **ExperimentControl** gRPC channel, exposed locally on port `17000` via an SSH tunnel. The `spiot_ctl` client (started automatically by `mrg-iot run`) connects to this channel and presents an interactive prompt.
+
+The control interface organizes commands into three namespaces:
+
+| Namespace | Purpose |
+|---|---|
+| `exp` | Experiment-level operations (list devices, get credentials, automation helpers) |
+| `dev` | Send commands to a specific IoT device |
+| `query` | Poll and retrieve results for asynchronous device commands |
+
+---
+
+## Starting the Control Client
+
+### Via mrg-iot run (recommended)
+
+The `spiot_ctl` prompt is opened automatically at the end of the `mrg-iot run` setup flow. No additional steps are required.
+
+### Via mrg-iot ctl (inside the XDC)
+
+If you are already inside the XDC, you can connect to ExperimentControl directly over WireGuard:
+
 ```sh
-./spiot_ctl
+mrg-iot ctl              # default host: 192.168.254.1
 ```
 
+---
 
-While running the spiot-client, you can run the following to get a list of IoT devices that are
-being managed of the experiment:
+## Experiment Commands
+
+### List Devices
+
+List all IoT devices currently managed by the experiment:
 
 ```
 exp devices
 ```
 
-An experiment with devices `s-echodot-1`, `s-echodot-2`, and `s-echopop-1` would output the 
-following:
+Example output for an experiment with `s-echodot-1`, `s-echodot-2`, and `s-echopop-1`:
 
 ![](01_Exp_Devices.png#zoomable)
 
-To get app credentials for a device the following command can be used:
+### Get Device Credentials
+
+Retrieve application credentials for a specific device:
+
 ```
 exp cred <device>
 ```
 
-To get the credentials for `s-echodot-1` the command would be:
+Example:
+
 ```
 exp cred s-echodot-1
 ```
 
-Which returns:
-
 ![](02_Exp_Cred_Device.png#zoomable)
 
-In order to automate the execution of commands, the following commands implemented to provide support
-important features relevant to automation:
+Credentials include any device-specific login or API tokens needed to interact with the device's native application.
+
+### Pause Execution
+
+Pause the experiment for a set duration (in seconds). This is useful for allowing devices time to start up or for spacing out automated command sequences:
+
 ```
-exp sleep <duration in seconds>
+exp sleep <seconds>
+```
+
+Example — pause for 30 seconds:
+
+```
+exp sleep 30
+```
+
+### Run Commands from a File
+
+Read a file from the XDC filesystem and execute each line as a command, in order, via the job queue:
+
+```
 exp read <filepath>
 ```
 
-The experiment sleep command pauses execution of the experiment for a set amount of time, allowing for devices to
-be given time to start up or for execution to be completed on an operation.
+This is the primary mechanism for automating experiment workflows. Each line in the file is treated as a single command.
 
-The experiment read command will read the specified file from the XDC and will send all the commands contained in
-the file to be run automatically from a job queue.
+---
 
-## Device Interaction
+## Device Commands
 
-To get a list of commands supported by a device you can run the one of the two following commands:
+### List Available Commands
+
+Display all commands supported by a device, with short descriptions:
+
 ```
-dev <device> help
-dev <device> commands
-```
-
-This will output a summary of all the commands and their descriptions that are supported by the device:
-
-![](03_Dev_Name_Help.png#zoomable)
-
-As mentioned in the description, more information about a command can be requested:
-```
-dev device <command> help
+<device> help
+<device> commands
 ```
 
-Note that commands can differ between devices, even if they are the same model. For example, the subject 
-device `s-echopop-1` specifies targets for `click_button`, the description for this command can be queried 
-using the following command:
+Example:
+
 ```
-dev s-echopop-1 click_button help
+s-echodot-1 help
 ```
 
-In comparison, the subject device `s-echodot-1` does not specify any target for `click_button`, the description
-for this command can be queried using the same command:
+The output lists each command name alongside a brief description of what it does.
+
+{{% alert title="Note" color="info" %}}
+Commands can differ between devices even if they are the same model. A device may support additional targets or parameters that its sibling does not. Always query a specific device rather than assuming commands are identical across the same model.
+{{% /alert %}}
+
+### Get Help for a Specific Command
+
+Display detailed information about a single command, including accepted parameters:
+
 ```
-dev s-echodot-1 click_button help
+<device> <command> help
 ```
 
-The results of running both of these commands would return:
+Examples — comparing `click_button` across two devices:
 
-![](04_Dev_Name_Command_Help.png#zoomable)
+```
+s-echopop-1 click_button help
+s-echodot-1 click_button help
+```
+
+`s-echopop-1` may list specific button targets as required parameters, while `s-echodot-1` may accept no arguments for the same command. The output for each device reflects its actual capabilities.
+
+### Execute a Device Command
+
+Send a command to a device:
+
+```
+<device> <command> [args...]
+```
+
+Examples:
+
+```
+s-echodot-1 click_button
+s-echopop-1 click_button action_button
+s-echodot-1 power_off
+```
+
+Commands execute either synchronously (result returned immediately) or asynchronously (a job ID is returned for polling). Device help output indicates which mode applies.
+
+---
 
 ## Command Queries
 
-Some commands are asynchronously queued, these commands are given a job id that can be
-store and used by experiment to get information about the command being executed.
+Many device commands are executed **asynchronously**. When you run such a command, it is placed in a job queue and assigned a numeric **job ID**. You can use the `query` namespace to inspect the state of running or completed jobs.
 
-Information can be queried using the following commands:
+### Check Command State
+
+Get the current state of an async command (`pending`, `in_progress`, `complete`, or `canceled`):
 
 ```
 query state <device> <command> <id>
-query get_result <device> <command> <id>
-query wait_result <device> <command> <id>
 ```
 
-The `query state` command gets the current state of the command, indicating whether it 
-is complete, in progress, or canceled. To get the state of the `click_button` command on device
-`s-echodot-1` with id `0` can be done using the following command:
+Example:
+
 ```
 query state s-echodot-1 click_button 0
 ```
 
-If the result of the state command indicates that the command has completed then the `query get_result` command can be 
-used to get the result of the command. To get the result of the same `click_button` command, the following command can 
-be used:
+### Retrieve Command Result
+
+Fetch the result of a completed command. Only meaningful once the state is `complete`:
+
+```
+query get_result <device> <command> <id>
+```
+
+Example:
 
 ```
 query get_result s-echodot-1 click_button 0
 ```
 
-This work workflow would be run as follows:
+A common pattern is to first check state, then retrieve the result:
 
-![](05_Query_State_and_Get_Result.png#zoomable)
+```
+query state s-echodot-1 click_button 0
+query get_result s-echodot-1 click_button 0
+```
 
-Rather than manually checking the state before getting the value, the results the `wait_result`
-command can be used to wait and get the result of the command as soon as it is available. To wait
-and get the result of the `click_button` command with job id `0` for `s-echodot-1` the following
-command would be used:
+### Wait for Result
+
+Block until the command completes, then return the result immediately. This eliminates the need to manually poll state:
+
+```
+query wait_result <device> <command> <id>
+```
+
+Example:
 
 ```
 query wait_result s-echodot-1 click_button 0
 ```
-Which would result in the following:
 
-![](06_Query_Wait_Result.png#zoomable)
+Use `wait_result` in scripts and automated workflows to ensure sequential dependencies are satisfied before proceeding.
 
-In order to better facilitate using query commands along with automating experiments, variables
-can be used to store information from a command, that can be retrieved and used at a later time.
-To do this the following command can be used:
+---
 
-```
-dev <device> [-s <id or results>] <results> <command> [command args]
-```
+## Storing and Reusing Job IDs
 
-To execute and store the job id for a `click_button` command on `s-echodot-1` the following command
-can be used:
+When automating sequences of commands, you often need to capture the job ID returned by one command and pass it to a subsequent `query` command. The `-s` flag stores a value from the command output into a named variable:
 
 ```
-dev s-echodot-1 -s id job click_button
+<device> -s <variable_name> <field> <command> [args...]
 ```
 
-This result can then be used in subsequent commands by prefixing the variable with an underscore,
-using the previous example of storing `0` into a `job` variable would make the following two 
-commands equivalent:
+| Argument | Description |
+|---|---|
+| `-s <variable_name>` | Name of the variable to store the value into |
+| `<field>` | Which field to capture: `id` (job ID) or `results` |
+| `<command>` | The device command to execute |
+
+### Example: Storing a Job ID
+
+Execute `click_button` on `s-echodot-1` and store the returned job ID in a variable named `job`:
+
+```
+s-echodot-1 -s job id click_button
+```
+
+### Example: Using a Stored Variable
+
+Reference a stored variable by prefixing it with an underscore (`_`). The following two commands are equivalent when `job` holds the value `0`:
+
 ```
 query wait_result s-echodot-1 click_button _job
 query wait_result s-echodot-1 click_button 0
 ```
 
-The usage of the variables would appear as follows:
+This pattern is especially useful in files executed via `exp read`, where job IDs from earlier commands need to be referenced later in the same script.
 
-![](07_Store_Load_Job_Id.png#zoomable)
+### Full Automation Example
+
+```
+s-echodot-1 -s job id click_button
+query wait_result s-echodot-1 click_button _job
+exp sleep 5
+s-echodot-1 -s job id click_button
+query wait_result s-echodot-1 click_button _job
+```
+
+---
+
+## Video Streams
+
+Camera-equipped devices expose RTSP streams proxied through port `8554`. Access them with VLC:
+
+```sh
+vlc rtsp://localhost:8554/<handler_name>
+```
+
+When using `mrg-iot run`, accessible camera feeds are opened automatically in VLC windows at session start.
+
+When using the daemon mode, open streams on demand:
+
+```sh
+mrg-iot show video
+```
+
+{{% alert title="Note" color="info" %}}
+VLC must be installed and on your `PATH` (install it from your OS package manager — it is not a pip package). If VLC is missing, the tool prints a notice and the stream stays available at the URL above for any RTSP-capable player.
+{{% /alert %}}
+
+---
+
+## Daemon Mode Command Reference
+
+When an experiment session is running as a background daemon (started with `mrg-iot connect`), use `mrg-iot send` to issue commands without an interactive prompt:
+
+```sh
+mrg-iot send "<command>"
+```
+
+Multiple commands are executed in order:
+
+```sh
+mrg-iot send "exp devices" "exp cred s-echodot-1"
+```
+
+All `exp`, `dev`, and `query` commands are supported identically to the interactive prompt.
+
+### Example Script
+
+```sh
+mrg-iot send "exp devices"
+mrg-iot send "s-echodot-1 -s job id click_button"
+mrg-iot send "query wait_result s-echodot-1 click_button _job"
+mrg-iot send "exp sleep 10"
+mrg-iot send "s-echodot-1 power_off"
+```
+
+---
+
+## Downloading Experiment Files
+
+### From the Daemon
+
+```sh
+mrg-iot download traffic
+mrg-iot download traffic --output /path/to/output.tar.gz
+```
+
+### From Inside the XDC (manual)
+
+While connected with the `9000` tunnel active:
+
+```sh
+curl -O -J http://192.168.254.1:9000
+```
+
+The downloaded archive is named:
+
+```
+<realization>.<experiment>.<project>.tar.gz
+```
+
+Extract it with:
+
+```sh
+tar -xvf <archive>.tar.gz
+```
+
+The archive always contains a log file and a `.pcap` network capture. Additional output files (screenshots, command results) are included based on the commands executed during the session.
+
+---
+
+## Full Command Reference
+
+### exp namespace
+
+| Command | Description |
+|---|---|
+| `exp devices` | List all devices in the current experiment |
+| `exp cred <device>` | Get application credentials for a device |
+| `exp sleep <seconds>` | Pause execution for the given number of seconds |
+| `exp read <filepath>` | Read and execute commands from a file on the XDC |
+
+### device namespace
+
+| Command | Description |
+|---|---|
+| `<device> help` | List all commands supported by the device |
+| `<device> commands` | Alias for `<device> help` |
+| `<device> <command> help` | Show detailed help for a specific command |
+| `<device> <command> [args...]` | Execute a command on the device |
+| `<device> -s <var> id <command> [args...]` | Execute and store the returned job ID |
+| `<device> -s <var> results <command> [args...]` | Execute and store the returned result |
+
+### query namespace
+
+| Command | Description |
+|---|---|
+| `query state <device> <command> <id>` | Get the current state of an async command |
+| `query get_result <device> <command> <id>` | Retrieve the result of a completed command |
+| `query wait_result <device> <command> <id>` | Block until the command completes and return its result |
+
+Variables stored with `-s` are referenced in subsequent commands by prefixing the variable name with `_` (e.g. `_job`).
