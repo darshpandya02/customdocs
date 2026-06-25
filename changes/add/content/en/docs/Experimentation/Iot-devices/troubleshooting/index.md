@@ -10,16 +10,15 @@ This page collects the issues users hit most often, grouped by where they occur:
 setup, login, resource conflicts, connection/tunnels, and device interaction. Each
 entry lists the symptom you'll see and the fix.
 
-{{% alert title="First step for almost any failure" color="info" %}}
-Re-run the command with the global `--debug` flag. This writes verbose logs to
+Run the command with the global `--debug` flag. This writes verbose logs to
 `~/.mrg-iot/debug.log`, and the background daemon writes to `~/.mrg-iot/daemon.log`.
 These two files contain the underlying SSH, gRPC, and portal errors behind most
-generic messages.
+generic messages. These can give you a more detailed overview of any issue.
+
 ```sh
 mrg-iot --debug run
-cat ~/.mrg-iot/daemon.log
+cat ~/.mrg-iot/debug.log
 ```
-{{% /alert %}}
 
 ## Exit codes
 

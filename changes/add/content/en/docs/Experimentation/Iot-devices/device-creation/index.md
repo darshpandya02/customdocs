@@ -6,7 +6,7 @@ description: >
     Reserve, materialize, and connect to Sphere IoT devices using the mrg-iot CLI or the Merge portal directly.
 ---
 
-New to IoT devices on Sphere? Start with the [Quickstart](content/en/docs/Experimentation/Iot-devices/quickstart/) for the
+New to IoT devices on Sphere? Start with the [Quickstart](/docs/Experimentation/Iot-devices/quickstart/) for the
 shortest path. This page is the complete reference for every creation workflow.
 
 ## Overview
@@ -218,7 +218,7 @@ If any selected device has an accessible camera, a VLC window opens automaticall
 
 **10. Interactive Session**
 
-The `spiot_ctl` prompt becomes available. See [Device Interaction](content/en/docs/Experimentation/Iot-devices/device-interaction/) for the full command reference.
+The `spiot_ctl` prompt becomes available. See [Device Interaction](/docs/Experimentation/Iot-devices/device-interaction/) for the full command reference.
 
 ### Post-Experiment Cleanup
 
@@ -440,6 +440,6 @@ mrg-iot xdc delete --project <project> --name <name>
 mrg-iot ctl              # connects to 192.168.254.1:17000 (default)
 ```
 
-This opens the same `spiot_ctl` prompt used by `mrg-iot run`. See [Device Interaction](content/en/docs/Experimentation/Iot-devices/quickstart/device-interaction/) for the full command reference.
+This opens the same `spiot_ctl` prompt used by `mrg-iot run`. See [Device Interaction](/docs/Experimentation/Iot-devices/quickstart/device-interaction/) for the full command reference.
 
 Command history is saved to `~/.spiot_history` (up to 500 entries).

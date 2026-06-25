@@ -89,7 +89,7 @@ realization and XDC.
 exit
 ```
 
-## Next steps
+## Detailed Steps
 
 - **[Device Creation](../device-creation/)** — interactive, non-interactive, and daemon
   modes; the manual `mergexp` path; and per-resource management commands.
