@@ -21,14 +21,14 @@ control interface is used to issue commands to the devices once they are running
 
 ## Which page do I need?
 
-- **[Quickstart](quickstart)** — Start here. The shortest path from install to
+- **[Quickstart](quickstart/)** — Start here. The shortest path from install to
   interacting with a device, in a handful of commands.
-- **[Device Creation](device-creation)** — The full reference for reserving,
+- **[Device Creation](device-creation/)** — The full reference for reserving,
   materializing, and connecting to devices with `mrg-iot`, including the automated,
   daemon, and manual workflows.
-- **[Device Interaction](device-interaction)** — The complete command reference for
+- **[Device Interaction](device-interaction/)** — The complete command reference for
   the `spiot_ctl` control interface: sending commands, querying async job results,
   and automating workflows.
-- **[Troubleshooting & FAQ](troubleshooting)** — Common errors and how to resolve
+- **[Troubleshooting & FAQ](troubleshooting/)** — Common errors and how to resolve
   them: cleaning up leftover resources, login and connection problems, validation
   rules, and device-command errors.

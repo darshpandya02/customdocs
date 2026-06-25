@@ -6,7 +6,7 @@ description: >
     Reserve, materialize, and connect to Sphere IoT devices using the mrg-iot CLI or the Merge portal directly.
 ---
 
-New to IoT devices on Sphere? Start with the [Quickstart](../quickstart) for the
+New to IoT devices on Sphere? Start with the [Quickstart](../quickstart/) for the
 shortest path. This page is the complete reference for every creation workflow.
 
 ## Overview
@@ -218,7 +218,7 @@ If any selected device has an accessible camera, a VLC window opens automaticall
 
 **10. Interactive Session**
 
-The `spiot_ctl` prompt becomes available. See [Device Interaction](../device-interaction) for the full command reference.
+The `spiot_ctl` prompt becomes available. See [Device Interaction](../device-interaction/) for the full command reference.
 
 ### Post-Experiment Cleanup
 
@@ -309,7 +309,7 @@ mrg-iot disconnect
 {{% alert title="Note" color="info" %}}
 For experiments that include non-IoT nodes, the manual path is required. For IoT-only experiments the automated path with `mrg-iot` is strongly recommended.
 
-Consult the Merge Testbed Hello World documentation ([CLI](/docs/experimentation/hello-world) / [Web Interface](/docs/experimentation/hello-world-gui)) for foundational experiment creation concepts.
+Consult the Merge Testbed Hello World documentation ([CLI](/docs/experimentation/hello-world/) / [Web Interface](/docs/experimentation/hello-world-gui/)) for foundational experiment creation concepts.
 {{% /alert %}}
 
 ### 1. Write the Experiment Model
@@ -440,6 +440,6 @@ mrg-iot xdc delete --project <project> --name <name>
 mrg-iot ctl              # connects to 192.168.254.1:17000 (default)
 ```
 
-This opens the same `spiot_ctl` prompt used by `mrg-iot run`. See [Device Interaction](../device-interaction) for the full command reference.
+This opens the same `spiot_ctl` prompt used by `mrg-iot run`. See [Device Interaction](../device-interaction/) for the full command reference.
 
 Command history is saved to `~/.spiot_history` (up to 500 entries).
