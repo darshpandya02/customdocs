@@ -7,7 +7,7 @@ description: >
 ---
 
 {{% alert title="Prerequisite" color="info" %}}
-This guide assumes IoT devices have already been reserved and an active session is running. See [Device Creation](/docs/Experimentation/Iot-devices/device-creation/) for setup instructions, or the [Quickstart](/docs/Experimentation/Iot-devices/quickstart/) for the short path.
+This guide assumes IoT devices have already been reserved and an active session is running. See [Device Creation](https://mergetb.gitlab.io/testbeds/sphere/sphere-docs/docs/experimentation/iot-devices/device-creation/) for setup instructions, or the [Quickstart](https://mergetb.gitlab.io/testbeds/sphere/sphere-docs/docs/experimentation/iot-devices/quickstart/) for the short path.
 {{% /alert %}}
 
 ## Overview
