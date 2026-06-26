@@ -381,8 +381,8 @@ always contains a log and a `.pcap`; extract with `tar -xvf <archive>.tar.gz`.
 
 ## Still stuck?
 
-1. Re-run with `--debug` and read `~/.mrg-iot/debug.log` and `~/.mrg-iot/daemon.log`.
-2. Verify state from the portal at
+1. Verify state from the portal at
    [launch.sphere-testbed.net](https://launch.sphere-testbed.net).
+2. Re-run with `--debug` and read `~/.mrg-iot/debug.log` and `~/.mrg-iot/daemon.log`.
 3. Report the issue (with the relevant log lines) to the NEU IoT Facility — IoT support
    is in beta and feedback is welcomed.
