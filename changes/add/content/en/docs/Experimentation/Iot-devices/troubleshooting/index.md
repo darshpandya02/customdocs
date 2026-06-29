@@ -46,7 +46,7 @@ cat ~/.mrg-iot/debug.log
 pipx ensurepath
 ```
 
-then open a new shell. Confirm with `mrg-iot --version`. Requires **Python 3.9+**.
+then open a new shell. Confirm with `mrg-iot --version`. Requires **Python 3.10+**.
 
 ### SSL / certificate errors on macOS
 

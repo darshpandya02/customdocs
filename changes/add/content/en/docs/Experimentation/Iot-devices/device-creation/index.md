@@ -18,6 +18,19 @@ IoT devices in Sphere are provisioned as nodes within a **realization** attached
 | `9000` | Experiment file download server |
 | `17000` | ExperimentControl gRPC channel |
 
+At a glance, the connection path from your laptop to the devices looks like this:
+
+```
+                  SSH tunnels                       WireGuard
+                (8554 / 9000 / 17000)
+  Your laptop  ───────────────────────►   XDC   ───────────────►  ExperimentControl
+  mrg-iot /                                                        (192.168.254.1:17000)
+  spiot_ctl                                                                │
+                                                                           ▼
+                                                                    IoT devices
+                                                                  (s-echodot-1, …)
+```
+
 There are two ways to reach this state: the **automated path** using `mrg-iot` (recommended), and the **manual path** via the Merge portal or CLI with hand-crafted experiment models.
 
 ---
@@ -83,11 +96,11 @@ mrg-iot run
 
 At startup you are asked whether to use the simplified setup:
 
-![](02_Mrgiot_Auto_Mode_Select.png#zoomable)
+![Prompt asking whether to use the simplified setup](02_Mrgiot_Auto_Mode_Select.png#zoomable)
 
 Each value is confirmed before the model is compiled and pushed:
 
-![](07_Mrgiot_Manual_Experiment_Setup.png#zoomable)
+![Confirmation of each experiment value before the model is compiled and pushed](07_Mrgiot_Manual_Experiment_Setup.png#zoomable)
 
 #### Simplified Interactive Mode
 
@@ -151,8 +164,8 @@ The CLI validates inputs before contacting the portal and exits with code `2` on
 | Description | Letters, digits, spaces, commas, periods, hyphens; max 256 characters |
 | Duration | Minimum **4 days**. Formats: `1w`, `4d`, `1w2d3h`, `1 week 2 days` |
 
-{{% alert title="Recommendation" color="info" %}}
-Use at least `4d` (4 days) as the duration. Expiry notifications are sent 3 days before XDC expiry and 1 day before realization expiry, so shorter durations leave no buffer.
+{{% alert title="Minimum duration" color="warning" %}}
+The duration must be **at least 4 days** — the CLI rejects anything shorter with exit code `2`. Expiry notifications are sent 3 days before XDC expiry and 1 day before realization expiry, so 4 days is also the practical minimum for receiving any warning.
 {{% /alert %}}
 
 ### Step-by-Step Walkthrough
@@ -163,35 +176,35 @@ The following describes what happens when you run `mrg-iot run`:
 
 If no valid session token exists, you are prompted for your Sphere username and password.
 
-![](03_Mrgiot_Auto_Login.png#zoomable)
+![Login prompt for the Sphere username and password](03_Mrgiot_Auto_Login.png#zoomable)
 
 **2. Project Selection**
 
 If your account belongs to more than one project, you are presented with a numbered list. Enter the index or name of the project to use.
 
-![](04_Mrgiot_Auto_Projects.png#zoomable)
+![Numbered list of projects to choose from](04_Mrgiot_Auto_Projects.png#zoomable)
 
 **3. Device Selection**
 
 All devices available in your project are listed with index numbers. Select devices by index or by name. You may add multiple devices across several prompts. Once finished, enter an empty line or confirm to proceed.
 
-![](05_Mrgiot_Auto_Select_Devices.png#zoomable)
+![Numbered list of available devices for selection](05_Mrgiot_Auto_Select_Devices.png#zoomable)
 
 Invalid or unknown device names are ignored, and your selection is confirmed before continuing:
 
-![](06_Mrgiot_Auto_Select_Devices_Out.png#zoomable)
+![Confirmation of the selected devices after invalid names are ignored](06_Mrgiot_Auto_Select_Devices_Out.png#zoomable)
 
 **4. Model Compilation and Push**
 
 `mrg-iot` builds a Python experiment model, compiles it, and pushes it to the Merge portal. In simplified mode this happens automatically; in customized mode you are first prompted for the experiment name, description, and network name.
 
-![](07_Mrgiot_Auto_Compile.png#zoomable)
+![Experiment model being compiled and pushed to the Merge portal](07_Mrgiot_Auto_Compile.png#zoomable)
 
 **5. Duration Selection**
 
 Enter how long the realization and XDC should remain active, in `<N>w <N>d <N>h <N>m <N>s` format. Example: `0w 4d 0h 0m 0s`.
 
-![](08_Mrgiot_Auto_Select_Duration.png#zoomable)
+![Prompt for entering the realization and XDC duration](08_Mrgiot_Auto_Select_Duration.png#zoomable)
 
 **6. Realization and Materialization**
 
@@ -201,9 +214,9 @@ The experiment is realized (resources are reserved) and then materialized (devic
 
 An XDC is created and the realization is attached to it. `mrg-iot` waits until the XDC is ready before proceeding.
 
-![](09_Mrgiot_Manual_xdc_Name.png#zoomable)
+![XDC name entry during XDC creation](09_Mrgiot_Manual_xdc_Name.png#zoomable)
 
-![](10_Mrgiot_Experiment_Start_Up.png#zoomable)
+![Experiment starting up after the XDC is attached](10_Mrgiot_Experiment_Start_Up.png#zoomable)
 
 **8. Tunnel Setup**
 
@@ -213,10 +226,9 @@ SSH tunnels are established from your laptop to the XDC, forwarding ports `8554`
 
 If any selected device has an accessible camera, a VLC window opens automatically for each camera feed. (If VLC is not installed, the streams are skipped but remain available at `rtsp://localhost:8554/<handler>`.)
 
-![](11_Mrgiot_Camera_Stream.png#zoomable)
+![VLC window showing a live camera stream from an IoT device](11_Mrgiot_Camera_Stream.png#zoomable)
 
 **10. Interactive Session**
-
 
 The `spiot_ctl` prompt becomes available. See [Device Interaction](https://mergetb.gitlab.io/testbeds/sphere/sphere-docs/docs/experimentation/iot-devices/device-interaction/) for the full command reference.
 
@@ -233,11 +245,11 @@ Type `exit` at the `spiot_ctl` prompt to end the session. `mrg-iot` then:
    realiot.jsmith.neuiot.tar.gz
    ```
 
-   ![](12_Mrgiot_Experiment_Download.png#zoomable)
+   ![Prompt offering to download the experiment files archive](12_Mrgiot_Experiment_Download.png#zoomable)
 
 2. **Cleans up resources.** In simplified mode the XDC is deleted automatically after the realization is detached and relinquished. In customized mode you are prompted whether to delete the XDC and then the experiment.
 
-   ![](13_Mrgiot_Manual_Post_Download.png#zoomable)
+   ![Post-download cleanup prompts for deleting the XDC and experiment](13_Mrgiot_Manual_Post_Download.png#zoomable)
 
 To extract the downloaded archive:
 
@@ -245,7 +257,7 @@ To extract the downloaded archive:
 tar -xvf realiot.jsmith.neuiot.tar.gz
 ```
 
-![](14_Mrgiot_Extract_Download.png#zoomable)
+![Extracting the downloaded experiment archive with tar](14_Mrgiot_Extract_Download.png#zoomable)
 
 The archive contains at minimum a log file and a `.pcap` network capture. Additional files (screenshots, command outputs) are included based on the commands you ran during the session.
 
@@ -341,11 +353,11 @@ Connect to the XDC while establishing the required tunnels:
 mrg xdc ssh <xdc_name> -L 9000:192.168.254.1:9000 -L 8554:192.168.254.1:8554
 ```
 
-This forwards the file download server (port `9000`) on the host machine (IP `192.168.254.1`) to your local machine. For the RTSP video stream, add `-L 8554:192.168.254.1:8554`.
+This forwards two services from the host machine (IP `192.168.254.1`) to your local machine: the file download server (port `9000`) and the RTSP video stream proxy (port `8554`). Drop the `8554` forward if none of your devices have a camera.
 
 ### 3. Download and Run the Control Client
 
-Inside the XDC, download the `mrg-iot` tool:
+Inside the XDC, install the `mrg-iot` tool. Plain `pip` is fine here — the XDC is already an isolated environment, so `pipx` is not required:
 
 ```sh
 pip install mrg-iot
@@ -439,7 +451,6 @@ mrg-iot xdc delete --project <project> --name <name>
 ```sh
 mrg-iot ctl              # connects to 192.168.254.1:17000 (default)
 ```
-
 
 This opens the same `spiot_ctl` prompt used by `mrg-iot run`. See [Device Interaction](https://mergetb.gitlab.io/testbeds/sphere/sphere-docs/docs/experimentation/iot-devices/device-interaction/) for the full command reference.
 
