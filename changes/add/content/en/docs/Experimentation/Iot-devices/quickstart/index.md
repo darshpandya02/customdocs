@@ -56,10 +56,10 @@ mrg-iot run --simplified
 
 When prompted, select one or more devices by index or name:
 
-![](05_Mrgiot_Auto_Select_Devices.png#zoomable)
+![Device selection prompt listing the available IoT devices by index number](05_Mrgiot_Auto_Select_Devices.png#zoomable)
 
-{{% alert title="Recommendation" color="info" %}}
-Use at least `4d` (4 days) for the duration. Expiry notifications are sent 3 days before XDC expiry and 1 day before realization expiry, so shorter durations leave no buffer.
+{{% alert title="Minimum duration" color="warning" %}}
+The duration must be **at least `4d` (4 days)** — the CLI rejects anything shorter. Expiry notifications are sent 3 days before XDC expiry and 1 day before realization expiry, so 4 days is also the practical minimum for receiving any warning.
 {{% /alert %}}
 
 When setup completes, camera feeds (if any) open automatically and the `spiot_ctl`
@@ -73,7 +73,7 @@ At the `spiot_ctl` prompt, list the devices in your experiment and send a comman
 exp devices
 ```
 
-![](01_Exp_Devices.png#zoomable)
+![Output of the `exp devices` command listing the devices in the experiment](01_Exp_Devices.png#zoomable)
 
 ```
 s-echodot-1 click_button

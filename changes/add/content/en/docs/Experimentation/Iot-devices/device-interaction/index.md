@@ -52,7 +52,7 @@ exp devices
 
 Example output for an experiment with `s-echodot-1`, `s-echodot-2`, and `s-echopop-1`:
 
-![](01_Exp_Devices.png#zoomable)
+![Output of `exp devices` listing s-echodot-1, s-echodot-2, and s-echopop-1](01_Exp_Devices.png#zoomable)
 
 ### Get Device Credentials
 
@@ -68,7 +68,7 @@ Example:
 exp cred s-echodot-1
 ```
 
-![](02_Exp_Cred_Device.png#zoomable)
+![Application credentials returned for a device by the `exp cred` command](02_Exp_Cred_Device.png#zoomable)
 
 Credentials include any device-specific login or API tokens needed to interact with the device's native application.
 
@@ -321,11 +321,15 @@ mrg-iot download traffic --output /path/to/output.tar.gz
 
 ### From Inside the XDC (manual)
 
-While connected with the `9000` tunnel active:
+When running **inside the XDC**, reach the file server directly at its host IP — no tunnel is involved:
 
 ```sh
 curl -O -J http://192.168.254.1:9000
 ```
+
+{{% alert title="Note" color="info" %}}
+From **your laptop** instead, use `http://localhost:9000` while the `9000` SSH tunnel is active (see [Device Creation](https://mergetb.gitlab.io/testbeds/sphere/sphere-docs/docs/experimentation/iot-devices/device-creation/)). Inside the XDC there is no tunnel, so you address the host directly at `192.168.254.1`.
+{{% /alert %}}
 
 The downloaded archive is named:
 
