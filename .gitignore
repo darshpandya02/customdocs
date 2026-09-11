@@ -1,1 +1,15 @@
 *~
+
+# Generated working copies (cloned/built, not source of truth)
+website.orig/
+website/
+
+# Local build artifacts
+screenshots.zip
+screenshots/
+sphere-iot-documentation.html
+build-iot-html.py
+
+# Local-only files
+.DS_Store
+CLAUDE.md

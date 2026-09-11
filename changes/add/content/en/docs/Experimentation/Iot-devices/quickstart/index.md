@@ -3,13 +3,12 @@ title: "Quickstart"
 linkTitle: "Quickstart"
 weight: 1
 description: >
-    The shortest path from a fresh install to interacting with a live IoT device.
+    Install mrg-iot, bring up an IoT experiment, drive a device, and release the hardware, in a handful of commands.
 ---
 
-This guide walks the **happy path**: install the tool, start an experiment with default
-settings, and send a command to a device. For the full set of options, modes, and the
-manual workflow, see [Device Creation](https://mergetb.gitlab.io/testbeds/sphere/sphere-docs/docs/experimentation/iot-devices/device-creation/); for the complete control
-command reference, see [Device Interaction](https://mergetb.gitlab.io/testbeds/sphere/sphere-docs/docs/experimentation/iot-devices/device-interaction/).
+This is the **happy path**. It assumes you already have a SPHERE account with access
+to an IoT project. If you don't, or you want each step explained, start with
+[Getting Started](https://mergetb.gitlab.io/testbeds/sphere/sphere-docs/docs/experimentation/iot-devices/getting-started/) instead.
 
 {{% alert title="Beta" color="warning" %}}
 IoT device support is currently in **beta**. Report issues and share feedback with the NEU IoT Facility.
@@ -17,11 +16,13 @@ IoT device support is currently in **beta**. Report issues and share feedback wi
 
 ## Prerequisites
 
-- A Sphere / Merge Testbed account with access to an IoT project (e.g. `neuiot`)
-- Python 3.10 or later, with [`pipx`](https://pipx.pypa.io) installed
-- [VLC](https://www.videolan.org) — only needed for camera-equipped devices (the tool opens streams in VLC)
+- A SPHERE / Merge Testbed account with access to an IoT project (`neuiot`, `iotbeta`, or `iotdev`)
+- **Python 3.9 or later**, with [`pipx`](https://pipx.pypa.io) installed
+- [VLC](https://www.videolan.org), only needed if you want to watch camera streams
 
-## 1. Install `mrg-iot`
+---
+
+## 1. Install
 
 ```sh
 pipx install mrg-iot
@@ -29,12 +30,16 @@ mrg-iot --version
 ```
 
 {{% alert title="macOS SSL workaround" color="info" %}}
-If portal calls fail with an SSL error on macOS, run:
+If portal calls fail with a certificate error on macOS, run:
 ```sh
 export SSL_CERT_FILE="$(python -m certifi)"
 export REQUESTS_CA_BUNDLE="$SSL_CERT_FILE"
 ```
 {{% /alert %}}
+
+`mrg-iot --help` prints the whole command surface at any time:
+
+![The mrg-iot help output, listing the cmd, devices, exp, file, run, and stream command groups](overview.png#zoomable)
 
 ## 2. Log in
 
@@ -42,56 +47,112 @@ export REQUESTS_CA_BUNDLE="$SSL_CERT_FILE"
 mrg-iot login
 ```
 
-Your session token is stored at `~/.mrg-iot/session.json`.
+Your session token is cached at `~/.mrg-iot/session.json`, so you only do this once.
 
-## 3. Run an experiment
+## 3. Pick a device
 
-`mrg-iot run --simplified` drives the full lifecycle — device selection, realization,
-materialization, XDC creation, and tunnel setup — using sensible defaults derived from
-your username. You are prompted only for the devices and the duration.
+List what is free to reserve right now:
 
 ```sh
-mrg-iot run --simplified
+mrg-iot devices list --available
 ```
 
-When prompted, select one or more devices by index or name:
+![mrg-iot devices list --available printing a PROJECT and DEVICE column for each unallocated device, ending with '... and 223 more'](devices-available.png#zoomable)
 
-![Device selection prompt listing the available IoT devices by index number](05_Mrgiot_Auto_Select_Devices.png#zoomable)
+Device names look like `s-echodot-1`. Note one or two down for the next step.
 
-{{% alert title="Minimum duration" color="warning" %}}
-The duration must be **at least `4d` (4 days)** — the CLI rejects anything shorter. Expiry notifications are sent 3 days before XDC expiry and 1 day before realization expiry, so 4 days is also the practical minimum for receiving any warning.
+## 4. Bring up the experiment
+
+`exp setup` creates the experiment, allocates the hardware, brings it online,
+creates an XDC, and attaches it. One command, no prompts:
+
+```sh
+mrg-iot exp setup myexp --devices s-echodot-1
+```
+
+![mrg-iot exp setup reporting the project, experiment, realization, and XDC it provisioned](exp-setup.png#zoomable)
+
+{{% alert title="Names and durations" color="info" %}}
+Experiment, realization, and XDC names must match `^[a-z][a-z0-9]*$`: lowercase
+letters and digits only, starting with a letter, max 32 characters. The default
+duration is `1w`, and **4 days is the minimum**.
 {{% /alert %}}
 
-When setup completes, camera feeds (if any) open automatically and the `spiot_ctl`
-prompt becomes available.
+Anything you leave out is derived: the project (if you belong to only one), the
+experiment name (your username), the realization (`realiot`), and the XDC
+(`<experiment>xdc`). So `mrg-iot exp setup --devices s-echodot-1` on its own works too.
 
-## 4. Interact with a device
+## 5. Drive the device
 
-At the `spiot_ctl` prompt, list the devices in your experiment and send a command:
+Send commands with `cmd run`. Each one opens a session, runs, and exits:
 
-```
-exp devices
-```
-
-![Output of the `exp devices` command listing the devices in the experiment](01_Exp_Devices.png#zoomable)
-
-```
-s-echodot-1 click_button
+```sh
+mrg-iot cmd run "exp devices" --experiment myexp
 ```
 
-## 5. Finish up
+![mrg-iot cmd run sending 'exp devices' and printing the device the experiment holds](cmd-run.png#zoomable)
 
-Type `exit` to end the session. `mrg-iot` offers to download your experiment files
-(a `.tar.gz` archive containing logs and a `.pcap` capture) and then cleans up the
-realization and XDC.
+Ask a device what it can do, then do it:
 
+```sh
+mrg-iot cmd run "s-echodot-1 commands" -e myexp
+mrg-iot cmd run "s-echodot-1 click_button" -e myexp
 ```
-exit
+
+Prefer a prompt you can keep typing into? `mrg-iot cmd shell -e myexp` opens one.
+
+## 6. Collect the data and release the hardware
+
+```sh
+mrg-iot file list -e myexp                 # what the experiment produced
+mrg-iot file download -e myexp             # the whole output directory, as a zip
+mrg-iot exp teardown myexp                 # release everything
 ```
 
-## Detailed Steps
+`file list` shows the share the experiment writes into. `output` holds the current
+run, and `uploads` is where your own files land:
 
-- **[Device Creation](https://mergetb.gitlab.io/testbeds/sphere/sphere-docs/docs/experimentation/iot-devices/device-creation/)** — interactive, non-interactive, and daemon
-  modes; the manual `mergexp` path; and per-resource management commands.
-- **[Device Interaction](https://mergetb.gitlab.io/testbeds/sphere/sphere-docs/docs/experimentation/iot-devices/device-interaction/)** — the full `exp` / `dev` / `query`
-  command reference, async job handling, and automation with stored variables.
+![mrg-iot file list showing the uploads and output directories with their modification times](file-list.png#zoomable)
+
+And `exp teardown` names each resource as it releases it:
+
+![mrg-iot exp teardown reporting 'Torn down successfully' with the project, experiment, realization, and XDC it released](exp-teardown.png#zoomable)
+
+{{% alert title="Nothing expires on its own while you're away" color="warning" %}}
+An experiment you don't tear down keeps holding its hardware until its duration
+runs out, and it counts against your quota. Run `exp teardown` when you're done.
+It is safe to re-run and skips anything already gone.
+{{% /alert %}}
+
+---
+
+## The whole thing
+
+```sh
+pipx install mrg-iot
+mrg-iot login
+mrg-iot devices list --available
+mrg-iot exp setup myexp --devices s-echodot-1
+mrg-iot cmd run "s-echodot-1 click_button" -e myexp
+mrg-iot file download -e myexp
+mrg-iot exp teardown myexp
+```
+
+## One command instead of all of them
+
+`mrg-iot run` does the same lifecycle as a guided flow: it asks which devices you
+want, provisions them, drops you at the `spiot_ctl >` prompt, offers you the files
+on the way out, and cleans up when you type `exit`.
+
+```sh
+mrg-iot run                # interactive
+mrg-iot run --simplified   # interactive, but skips the optional prompts
+```
+
+It is the one command that asks questions. Every other command in these guides
+runs unattended exactly as written.
+
+## Next
+
+- **[Getting Started](https://mergetb.gitlab.io/testbeds/sphere/sphere-docs/docs/experimentation/iot-devices/getting-started/)**: the full walkthrough, including account setup, camera streams, and async commands.
+- **[Troubleshooting & FAQ](https://mergetb.gitlab.io/testbeds/sphere/sphere-docs/docs/experimentation/iot-devices/troubleshooting/)**: when something goes wrong.

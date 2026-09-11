@@ -3,31 +3,82 @@ title: "IoT Devices"
 linkTitle: "IoT Devices"
 weight: 6
 description: >
-    Reserve, materialize, and interact with physical IoT devices provided by Northeastern as part of your experiments.
+    Reserve, run, and interact with the physical IoT devices provided by Northeastern as part of your SPHERE experiments.
 ---
 
 {{% alert title="Beta" color="warning" %}}
 Support for IoT devices is currently in **beta**. Please report any issues you encounter, and share feedback with the NEU IoT Facility.
 {{% /alert %}}
 
-Sphere lets you incorporate real IoT devices — smart speakers, cameras, and similar
-hardware — into your experiments. Devices are provisioned as nodes within a
-**realization** attached to an **XDC** (Experiment Development Container). Once the
-realization is active and the XDC is connected, SSH tunnels expose the device services
-to your laptop, and you drive the devices through an interactive control client.
+SPHERE lets you incorporate real IoT devices, such as smart speakers, cameras, plugs,
+TVs, and phones, into your experiments. Everything is driven by one command-line
+tool, [`mrg-iot`](https://pypi.org/project/mrg-iot/): it reserves the devices, brings
+them online, sends commands to them, collects the captured data, and releases the
+hardware when you are done.
 
-The `mrg-iot` command-line tool automates this entire lifecycle, and the `spiot_ctl`
-control interface is used to issue commands to the devices once they are running.
+Everything the tool does is organised into a handful of command groups, one per thing
+you work with. `mrg-iot --help` is the map:
+
+![The mrg-iot help output, listing its command groups with the derived defaults for each name](overview.png#zoomable)
+
+## Where to start
+
+| Guide | Read it when |
+|---|---|
+| **[Quickstart](https://mergetb.gitlab.io/testbeds/sphere/sphere-docs/docs/experimentation/iot-devices/quickstart/)** | You want the shortest path: install the tool and drive a real device in a handful of commands. |
+| **[Getting Started](https://mergetb.gitlab.io/testbeds/sphere/sphere-docs/docs/experimentation/iot-devices/getting-started/)** | You want the full walkthrough, from creating an account to tearing the experiment down. |
+| **[Troubleshooting & FAQ](https://mergetb.gitlab.io/testbeds/sphere/sphere-docs/docs/experimentation/iot-devices/troubleshooting/)** | Something failed and you want the symptom, the cause, and the fix. |
+
+## Browse the devices
+
+Every device in the testbed is catalogued, with the details of each one, at
+**[devices.iot.sphere-testbed.net](https://devices.iot.sphere-testbed.net)**.
+
+Use it to see what hardware exists and what each device can do before you pick the
+ones for your experiment. To check what is free to reserve *right now*, ask the
+portal instead:
+
+```sh
+mrg-iot devices list --available
+```
 
 ## Key concepts
 
-If you are new to the Merge Testbed, these terms appear throughout the IoT guides:
+These terms appear throughout the IoT guides and in the rest of the SPHERE
+documentation:
 
 | Term | Meaning |
 |---|---|
 | **Experiment** | The model describing the devices and the network connecting them. |
 | **Realization** | A reservation of physical resources that satisfies an experiment's model. |
 | **Materialization** | The act of booting and configuring the reserved devices so they are live. |
-| **XDC** (Experiment Development Container) | The container you connect to in order to reach your experiment's devices. |
-| **Enclave** | The isolated network segment a materialized experiment runs in; `mrg-iot` resolves it for you when connecting. |
-| **ExperimentControl** | The gRPC service (port `17000`) that relays your commands to the devices. |
+| **XDC** (Experiment Development Container) | The container you connect through in order to reach your experiment's devices. |
+| **Deployed** | An experiment that is realized, materialized, and attached to a ready XDC. This is the state you can send commands in. |
+| **ExperimentControl** | The gRPC service (port `17000`) on the testbed that relays your commands to the devices. |
+| **`spiot_ctl`** | The control language you speak to devices in, e.g. `s-echodot-1 click_button`. |
+
+## How the pieces fit together
+
+`mrg-iot` runs on your laptop. Every command that talks to a running experiment
+opens its own SSH session to the XDC, forwards the ports it needs, does its work,
+and closes again. There is no daemon and nothing cached between invocations.
+
+```
+                    SSH tunnels                      WireGuard
+                (8554 / 9001 / 17000)
+   Your laptop ───────────────────────►   XDC   ───────────────►  ExperimentControl
+     mrg-iot                                                             │
+                                                                         ▼
+                                                                   IoT devices
+                                                                 (s-echodot-1, …)
+```
+
+| Port | Service |
+|---|---|
+| `8554` | RTSP camera stream proxy |
+| `9001` | File server web client (uploads and downloads) |
+| `17000` | `ExperimentControl` gRPC channel |
+
+Those are the *remote* ports. The local end of every tunnel is an OS-assigned
+ephemeral port, so several `mrg-iot` commands can run side by side in different
+terminals without colliding.
