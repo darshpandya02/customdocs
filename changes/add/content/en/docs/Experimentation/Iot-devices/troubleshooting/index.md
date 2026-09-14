@@ -1,7 +1,7 @@
 ---
 title: "Troubleshooting & FAQ"
 linkTitle: "Troubleshooting & FAQ"
-weight: 3
+weight: 4
 description: >
     Common mrg-iot errors, with the symptom, cause, and fix, plus answers to the questions that come up most.
 ---
@@ -53,6 +53,8 @@ follows the pipeline, so a higher code means the run got further:
 ---
 
 ## Installation & environment
+
+Install steps themselves live on the [Installation](https://mergetb.gitlab.io/testbeds/sphere/sphere-docs/docs/experimentation/iot-devices/installation/) page.
 
 ### `mrg-iot: command not found` after install
 
@@ -108,7 +110,7 @@ The portal rejected the attempt. In order of likelihood:
 
 Your account isn't a member of an IoT project yet. Request membership in `neuiot`
 (or `iotbeta` / `iotdev`) through the portal or from the NEU IoT Facility. See
-[Getting Started §1b](https://mergetb.gitlab.io/testbeds/sphere/sphere-docs/docs/experimentation/iot-devices/getting-started/#1b-iot-project-access).
+[Using mrg-iot §1b](https://mergetb.gitlab.io/testbeds/sphere/sphere-docs/docs/experimentation/iot-devices/using-mrg-iot/#1b-iot-project-access).
 
 ### "Already logged in as `<user>`"
 

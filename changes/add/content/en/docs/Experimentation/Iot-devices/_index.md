@@ -25,8 +25,9 @@ you work with. `mrg-iot --help` is the map:
 
 | Guide | Read it when |
 |---|---|
+| **[Installation](https://mergetb.gitlab.io/testbeds/sphere/sphere-docs/docs/experimentation/iot-devices/installation/)** | Start here. Puts `mrg-iot` on your `PATH`, plus the optional video player. |
 | **[Quickstart](https://mergetb.gitlab.io/testbeds/sphere/sphere-docs/docs/experimentation/iot-devices/quickstart/)** | You want the shortest path: install the tool and drive a real device in a handful of commands. |
-| **[Getting Started](https://mergetb.gitlab.io/testbeds/sphere/sphere-docs/docs/experimentation/iot-devices/getting-started/)** | You want the full walkthrough, from creating an account to tearing the experiment down. |
+| **[Using mrg-iot](https://mergetb.gitlab.io/testbeds/sphere/sphere-docs/docs/experimentation/iot-devices/using-mrg-iot/)** | You want the full walkthrough, from creating an account to tearing the experiment down. |
 | **[Troubleshooting & FAQ](https://mergetb.gitlab.io/testbeds/sphere/sphere-docs/docs/experimentation/iot-devices/troubleshooting/)** | Something failed and you want the symptom, the cause, and the fix. |
 
 ## Browse the devices

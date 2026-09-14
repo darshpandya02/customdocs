@@ -1,9 +1,9 @@
 ---
-title: "Getting Started"
-linkTitle: "Getting Started"
-weight: 2
+title: "Using mrg-iot"
+linkTitle: "Using mrg-iot"
+weight: 3
 description: >
-    The full walkthrough, from creating an account to releasing the hardware, using the mrg-iot command-line tool.
+    The complete workflow: account setup, installation, running an experiment, interacting with devices, collecting the data, and releasing the hardware.
 ---
 
 This guide takes you end to end: account, tool, experiment, interaction, data, cleanup.
@@ -71,63 +71,12 @@ you can pick from.
 
 ---
 
-## 2. Install the `mrg-iot` tool
+## 2. Log in
 
-### 2a. Installation
-
-| Requirement | Notes |
-|---|---|
-| **Python 3.9+** | 3.9 through 3.12 are supported and CI-tested. |
-| **Network access** | To the portal (`grpc.sphere-testbed.net:443`) and the SSH jump host (`jump.sphere-testbed.net:2022`). |
-| **[VLC](https://www.videolan.org/vlc/)** | Only needed to watch camera streams. It is not a pip package, so install it from your OS package manager. |
-
-The supported install path is [`pipx`](https://pipx.pypa.io/), which puts `mrg-iot`
-on your `PATH` in its own isolated environment:
-
-```sh
-pipx install mrg-iot
-```
-
-Or into an ordinary virtual environment:
-
-```sh
-python3 -m venv .venv && source .venv/bin/activate
-pip install mrg-iot
-```
-
-Verify:
-
-```sh
-mrg-iot --version
-mrg-iot --help
-```
-
-`--help` is worth reading once: it lists every command group and, at the bottom, what
-each name defaults to if you don't pass its flag. That is what makes the rest of
-this guide scriptable as written.
-
-![The mrg-iot help output, listing its command groups, then the derived defaults for project, devices, experiment, xdc, realization, network, and duration](overview.png#zoomable)
-
-If you plan to watch camera feeds, install VLC too:
-
-| Platform | Command |
-|---|---|
-| macOS | `brew install --cask vlc` |
-| Debian / Ubuntu | `sudo apt-get install vlc` |
-| Fedora | `sudo dnf install vlc` |
-| Windows | [Download from videolan.org](https://www.videolan.org/vlc/) |
-
-{{% alert title="macOS SSL workaround" color="info" %}}
-If portal calls fail with a `certificate verify failed` error, macOS Python is
-missing a usable CA bundle. Export the certifi one:
-```sh
-export SSL_CERT_FILE="$(python -m certifi)"
-export REQUESTS_CA_BUNDLE="$SSL_CERT_FILE"
-```
-Add both lines to your shell profile to make it stick.
+{{% alert title="Install the tool first" color="info" %}}
+This guide assumes `mrg-iot` is already on your `PATH`. If it isn't, see
+[Installation](https://mergetb.gitlab.io/testbeds/sphere/sphere-docs/docs/experimentation/iot-devices/installation/), then come back here.
 {{% /alert %}}
-
-### 2b. Log in
 
 ```sh
 mrg-iot login                                  # prompts for username and password
@@ -144,7 +93,7 @@ portal *rejects* it, so you rarely log in more than once. A brief network outage
 does not cost you the session: if the portal simply can't be reached, the cached
 token is kept.
 
-#### Unattended login (scripts and CI)
+### Unattended login (scripts and CI)
 
 Set credentials in the environment instead, and skip `login` entirely:
 
@@ -187,9 +136,22 @@ mrg-iot devices list --available
 
 ![mrg-iot devices list --available printing the project and device name for each free device](devices-available.png#zoomable)
 
-Device names are of the form `s-<model>-<n>`, e.g. `s-echodot-1`. This is the one
-device command that opens no session. It is pure inventory, and it hides devices
+Device names are of the form `<prefix>-<model>-<n>`, e.g. `s-echodot-1`. This is the
+one device command that opens no session. It is pure inventory, and it hides devices
 that are already allocated, including the ones your own experiment holds.
+
+The prefix says what kind of thing the name refers to:
+
+| Prefix | Meaning |
+|---|---|
+| `s-` | A device under test, e.g. `s-echodot-1`. These are what you reserve and send commands to. |
+| `m-` | A **helper phone**, e.g. `m-googlepixel-1`: a handset used to drive a device's companion app. These are being brought online and will start appearing alongside the `s-` names. |
+| `h-` | A **handler**, e.g. `h-camera-2`: the testbed hardware that acts on a device or watches it. You never address these directly; cameras are named by [`mrg-iot stream list`](#camera-streams-mrg-iot-stream) instead. |
+
+`mrg-iot` already reads both `s-` and `m-` names out of the experiment's banner, so
+`devices list` and `devices info` will report helper phones as soon as they are in
+your experiment. Only `s-` names are routed for commands today, and addressing an
+`m-` name returns a message saying so rather than failing silently.
 
 Once an experiment is running, the same command without `--available` names the
 devices *that experiment* is about:
@@ -316,6 +278,11 @@ of the same model, so ask the device itself rather than assuming:
 mrg-iot cmd run "s-echodot-1 commands" -e myexp        # what this device supports
 mrg-iot cmd run "s-echodot-1 click_button help" -e myexp   # how one command is used
 ```
+
+To browse what the hardware can do before you have an experiment running, use the
+device catalog at
+**[devices.iot.sphere-testbed.net](https://devices.iot.sphere-testbed.net)**, which
+lists every device in the testbed along with its details.
 
 The experiment-level commands are the same everywhere:
 
